@@ -75,7 +75,7 @@ pi -e ./src/index.ts --model openai/gpt-5.6-luna
 ## Requirements
 
 - Node `>= 22`
-- Pi `>=0.80.9 <0.81.0`
+- Pi `>=0.84.4 <0.85.0`
 - Auth/config for the model you want to use must already work in Pi
 - A supported OpenAI Responses model, e.g. `openai/gpt-5.6-sol` or `openai-codex/gpt-5.6-sol`
 
@@ -158,6 +158,10 @@ If something goes wrong:
 3. **Reload:** run `/reload` in Pi to re-initialize extensions
 4. **Uninstall:** `pi remove pi-openai-server-compaction`
 5. **Inspect:** check your session JSONL for `compaction` entries with `details.remoteCompaction` to see if remote compaction was recorded
+
+## Maintenance
+
+This fork is intentionally pinned to a tested Pi minor release. Before upgrading Pi to a new minor version, update the `@earendil-works/*` peer and development dependencies together, run the offline checks below, then run the live regression suite with both a direct `openai/*` model and an `openai-codex/*` model. The scheduled GitHub Action keeps the supported Pi 0.84 release checked between updates.
 
 ## Testing
 

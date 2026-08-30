@@ -68,6 +68,12 @@ function getSessionId(ctx: SessionContextLike): string {
   return ctx.sessionManager.getSessionId();
 }
 
+function definedHeaders(headers: Record<string, string | null> | undefined): Record<string, string> | undefined {
+  if (!headers) return undefined;
+  const entries = Object.entries(headers).filter((entry): entry is [string, string] => entry[1] !== null);
+  return entries.length > 0 ? Object.fromEntries(entries) : undefined;
+}
+
 function getBranchMessages(branchEntries: BranchEntry[]): AgentMessage[] {
   return branchEntries.flatMap((entry) =>
     entry.type === "message" && entry.message ? [entry.message as AgentMessage] : [],
@@ -230,7 +236,7 @@ export default function openaiServerCompactionExtension(pi: ExtensionAPI) {
         messages: fullBranchMessages,
         model,
         apiKey: auth.apiKey,
-        headers: auth.headers,
+        headers: definedHeaders(auth.headers),
         customInstructions: event.customInstructions,
         signal: event.signal,
         thinkingLevel,
@@ -240,7 +246,7 @@ export default function openaiServerCompactionExtension(pi: ExtensionAPI) {
       callRemoteCompactionEndpoint({
         model,
         apiKey: auth.apiKey,
-        headers: auth.headers,
+        headers: definedHeaders(auth.headers),
         sessionId,
         input: promptResponseItems,
         instructions: ctx.getSystemPrompt(),
