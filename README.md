@@ -161,7 +161,7 @@ If something goes wrong:
 
 ## Maintenance
 
-This fork is intentionally pinned to a tested Pi minor release. Before upgrading Pi to a new minor version, update the `@earendil-works/*` peer and development dependencies together, run the offline checks below, then run the live regression suite with both a direct `openai/*` model and an `openai-codex/*` model. The scheduled GitHub Action keeps the supported Pi 0.84 release checked between updates.
+This fork is intentionally constrained to a tested Pi minor release. The scheduled GitHub Action resolves the latest Pi 0.84 patch release each week. Before upgrading Pi to a new minor version, update the `@earendil-works/*` peer and development ranges together, run the offline checks below, then run the live regression suite with both a direct `openai/*` model and an `openai-codex/*` model.
 
 ## Testing
 
