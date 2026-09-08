@@ -161,21 +161,38 @@ If something goes wrong:
 
 ## Maintenance
 
-This fork is intentionally constrained to tested Pi minor releases. CI installs matching versions of all three `@earendil-works/pi-coding-agent`, `@earendil-works/pi-ai`, and `@earendil-works/pi-agent-core` packages, then runs `npm test` on Node 22. It tests the exact compatibility endpoints 0.84.4 and 0.85.1 on every run; the scheduled workflow also resolves the latest packages in the declared `>=0.84.4 <0.86.0` range each week.
+This fork is intentionally constrained to tested Pi minor releases. On every workflow trigger—pull request, push to `main`, manual dispatch, and the weekly schedule—CI uses Node 22 to resolve the latest versions of all three `@earendil-works/pi-coding-agent`, `@earendil-works/pi-ai`, and `@earendil-works/pi-agent-core` packages in the declared `>=0.84.4 <0.86.0` range, then runs `npm test`. Additional jobs install matching package sets at the exact versions 0.84.4 and 0.85.1 and assert that npm installed those versions before testing.
 
-The 0.84.4 and 0.85.1 compatibility checks are offline TypeScript typechecking plus smoke verification of imports and key algorithms. The 0.85 compatibility expansion does **not** represent new live provider validation. Before upgrading Pi to another minor version, update the three `@earendil-works/*` peer and development ranges together, run the offline checks below, then run the live regression suite with both a direct `openai/*` model and an `openai-codex/*` model.
+Version 0.84.4 is the lowest supported version. Version 0.85.1 is the specific and highest reviewed test point, not the semantic endpoint of the range; a later 0.85.x release will be selected by the floating job when it becomes the latest version in range. The exact compatibility checks are offline TypeScript typechecking plus smoke verification of imports and key algorithms. The 0.85 compatibility expansion does **not** represent new live provider validation. Before upgrading Pi to another minor version, update the three `@earendil-works/*` peer and development ranges together, run the offline checks below, then run the live regression suite with both a direct `openai/*` model and an `openai-codex/*` model.
 
 ## Testing
 
 Reproduce the exact-version offline compatibility checks without creating a lockfile:
 
 ```bash
+set -euo pipefail
 for PI_VERSION in 0.84.4 0.85.1; do
+  echo "Testing Pi $PI_VERSION"
   rm -rf node_modules
   npm install --ignore-scripts --no-package-lock --no-save \
     "@earendil-works/pi-coding-agent@$PI_VERSION" \
     "@earendil-works/pi-ai@$PI_VERSION" \
     "@earendil-works/pi-agent-core@$PI_VERSION"
+  PI_VERSION="$PI_VERSION" node <<'NODE'
+const { readFileSync } = require("node:fs");
+for (const name of [
+  "@earendil-works/pi-coding-agent",
+  "@earendil-works/pi-ai",
+  "@earendil-works/pi-agent-core",
+]) {
+  const installed = JSON.parse(
+    readFileSync(`node_modules/${name}/package.json`, "utf8"),
+  ).version;
+  if (installed !== process.env.PI_VERSION) {
+    throw new Error(`${name}: expected ${process.env.PI_VERSION}, installed ${installed}`);
+  }
+}
+NODE
   npm test
 done
 ```

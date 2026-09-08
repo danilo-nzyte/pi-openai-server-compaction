@@ -9,6 +9,16 @@ on:
   workflow_dispatch:
 
 jobs:
+  offline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --ignore-scripts --no-package-lock
+      - run: npm test
+
   exact-versions:
     name: Pi ${{ matrix.pi-version }}
     runs-on: ubuntu-latest
@@ -27,16 +37,23 @@ jobs:
             "@earendil-works/pi-coding-agent@${{ matrix.pi-version }}" \
             "@earendil-works/pi-ai@${{ matrix.pi-version }}" \
             "@earendil-works/pi-agent-core@${{ matrix.pi-version }}"
-      - run: npm test
-
-  latest-in-range:
-    name: Latest Pi in declared range
-    if: github.event_name == 'schedule'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - run: npm install --ignore-scripts --no-package-lock
+      - name: Verify exact Pi package versions
+        env:
+          PI_VERSION: ${{ matrix.pi-version }}
+        run: |
+          node <<'NODE'
+          const { readFileSync } = require("node:fs");
+          for (const name of [
+            "@earendil-works/pi-coding-agent",
+            "@earendil-works/pi-ai",
+            "@earendil-works/pi-agent-core",
+          ]) {
+            const installed = JSON.parse(
+              readFileSync(`node_modules/${name}/package.json`, "utf8"),
+            ).version;
+            if (installed !== process.env.PI_VERSION) {
+              throw new Error(`${name}: expected ${process.env.PI_VERSION}, installed ${installed}`);
+            }
+          }
+          NODE
       - run: npm test
