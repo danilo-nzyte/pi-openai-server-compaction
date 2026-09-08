@@ -75,7 +75,7 @@ pi -e ./src/index.ts --model openai/gpt-5.6-luna
 ## Requirements
 
 - Node `>= 22`
-- Pi `>=0.84.4 <0.85.0`
+- Pi `>=0.84.4 <0.86.0`
 - Auth/config for the model you want to use must already work in Pi
 - A supported OpenAI Responses model, e.g. `openai/gpt-5.6-sol` or `openai-codex/gpt-5.6-sol`
 
@@ -161,11 +161,26 @@ If something goes wrong:
 
 ## Maintenance
 
-This fork is intentionally constrained to a tested Pi minor release. The scheduled GitHub Action resolves the latest Pi 0.84 patch release each week. Before upgrading Pi to a new minor version, update the `@earendil-works/*` peer and development ranges together, run the offline checks below, then run the live regression suite with both a direct `openai/*` model and an `openai-codex/*` model.
+This fork is intentionally constrained to tested Pi minor releases. CI installs matching versions of all three `@earendil-works/pi-coding-agent`, `@earendil-works/pi-ai`, and `@earendil-works/pi-agent-core` packages, then runs `npm test` on Node 22. It tests the exact compatibility endpoints 0.84.4 and 0.85.1 on every run; the scheduled workflow also resolves the latest packages in the declared `>=0.84.4 <0.86.0` range each week.
+
+The 0.84.4 and 0.85.1 compatibility checks are offline TypeScript typechecking plus smoke verification of imports and key algorithms. The 0.85 compatibility expansion does **not** represent new live provider validation. Before upgrading Pi to another minor version, update the three `@earendil-works/*` peer and development ranges together, run the offline checks below, then run the live regression suite with both a direct `openai/*` model and an `openai-codex/*` model.
 
 ## Testing
 
-Smoke test (offline, verifies imports and key algorithms):
+Reproduce the exact-version offline compatibility checks without creating a lockfile:
+
+```bash
+for PI_VERSION in 0.84.4 0.85.1; do
+  rm -rf node_modules
+  npm install --ignore-scripts --no-package-lock --no-save \
+    "@earendil-works/pi-coding-agent@$PI_VERSION" \
+    "@earendil-works/pi-ai@$PI_VERSION" \
+    "@earendil-works/pi-agent-core@$PI_VERSION"
+  npm test
+done
+```
+
+Smoke test only (offline, verifies imports and key algorithms):
 
 ```bash
 npm run smoke

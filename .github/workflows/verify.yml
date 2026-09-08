@@ -9,12 +9,34 @@ on:
   workflow_dispatch:
 
 jobs:
-  offline:
+  exact-versions:
+    name: Pi ${{ matrix.pi-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        pi-version: ["0.84.4", "0.85.1"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install exact Pi packages
+        run: |
+          npm install --ignore-scripts --no-package-lock --no-save \
+            "@earendil-works/pi-coding-agent@${{ matrix.pi-version }}" \
+            "@earendil-works/pi-ai@${{ matrix.pi-version }}" \
+            "@earendil-works/pi-agent-core@${{ matrix.pi-version }}"
+      - run: npm test
+
+  latest-in-range:
+    name: Latest Pi in declared range
+    if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install --ignore-scripts
+      - run: npm install --ignore-scripts --no-package-lock
       - run: npm test
