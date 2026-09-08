@@ -1,5 +1,7 @@
 # Validation
 
+> **0.1.2 compatibility scope:** The Pi 0.85.1 evidence added for version 0.1.2 is offline TypeScript typechecking and smoke verification only. It adds no live Pi 0.85.1 or provider-validation claim; the live records below should not be read as Pi 0.85.1 validation.
+
 ## Current Responses compaction v2 validation
 
 The full live Pi RPC suite passes with both:

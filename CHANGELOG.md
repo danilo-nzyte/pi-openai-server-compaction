@@ -4,6 +4,11 @@ This changelog intentionally starts at **0.1.0**.
 
 ## Unreleased
 
+## 0.1.2 - 2026-09-08
+- expand the supported Pi range to `>=0.84.4 <0.86.0` across the three matching `@earendil-works/*` peer and development dependencies
+- verify exact Pi 0.84.4 and 0.85.1 package sets with Node 22 offline typecheck and smoke tests, while retaining a weekly latest-in-range check
+- document that the Pi 0.85 compatibility claim is offline verification only and does not add live provider validation
+
 ## 0.1.1 - 2026-08-30
 - maintain a tested compatibility range for Pi 0.84
 - normalize nullable Pi provider headers before forwarding them to OpenAI compaction requests
